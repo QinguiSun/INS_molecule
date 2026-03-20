@@ -16,7 +16,7 @@ class MoleculeDataset(Dataset):
     @property
     def raw_file_names(self):
         # Return the names of the files to be found in the `raw_dir`
-        f = open("data_list.txt", 'r')
+        f = open("/workspace/LRGB/datasets/INS_molecule/qm9_data_list.txt", 'r')
         data_list = f.read().splitlines()
         f.close()
         return data_list
@@ -53,11 +53,11 @@ class MoleculeDataset(Dataset):
 
 
 def make_data_point(raw_file, cutoff=5.0):
-    structrue_filename = "raw/" + raw_file + ".xyz"
+    structrue_filename = "/workspace/LRGB/datasets/INS_molecule/raw/qm9_raw/" + raw_file + ".xyz"
     mol = read(structrue_filename)
     pos = mol.get_positions()
     x = mol.get_atomic_numbers()
-    hessian_filename = "raw/hessian_" + raw_file + ".npy"
+    hessian_filename = "/workspace/LRGB/datasets/INS_molecule/raw/qm9_raw/hessian_" + raw_file + ".npy"
     hessian_matrix = np.load(hessian_filename)
     hessian_matrix = hessian_matrix * 27.2114079527 / 0.529177249 / 0.529177249 # convert atomic unit to eV/Angstrom**2
 
@@ -85,7 +85,7 @@ def make_data_point(raw_file, cutoff=5.0):
 
 if __name__ == '__main__':
 
-    dataset = MoleculeDataset('./')
+    dataset = MoleculeDataset('/workspace/LRGB/datasets/INS_molecule')
     print(dataset[0])
     dataset.shuffle()
 

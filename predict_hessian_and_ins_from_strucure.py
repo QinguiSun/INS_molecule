@@ -13,7 +13,7 @@ import jax
 # # Initialize the model
 model = Model()
 orbax_checkpointer = ocp.StandardCheckpointer()
-params = orbax_checkpointer.restore('/path_to_checkpoint/flax_ckpt/hessian_checkpoint_x')['model_param']  #jax.jit(model.init)(random_key, dataset[0])
+params = orbax_checkpointer.restore('/workspace/LRGB/datasets/INS_molecule/hessian_checkpoint_23')['model_param']  #jax.jit(model.init)(random_key, dataset[0])
 
 # If you want to run on CPU, uncomment the following line
 
@@ -116,8 +116,8 @@ def gen_oclimax_xyz(filename, mol, freq, modes):
 
 if __name__ == "__main__":
 
-    raw_file = "sucrose.xyz"
+    raw_file = "/workspace/LRGB/datasets/INS_molecule/raw/qm9_raw/118131.xyz"
     hessian, mol = predict_hessian_from_strucure(raw_file)
     pred_freq, pred_modes = cal_freq_modes(mol, hessian)
-    gen_oclimax_xyz("./sucrose_oclimax.xyz", mol, pred_freq, pred_modes)
-    subprocess.run(["./oclimax_convert", "-xyz", "./sucrose_oclimax.xyz"], text=True)
+    #gen_oclimax_xyz("./sucrose_oclimax.xyz", mol, pred_freq, pred_modes)
+    #subprocess.run(["./oclimax_convert", "-xyz", "./sucrose_oclimax.xyz"], text=True)

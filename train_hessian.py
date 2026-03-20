@@ -90,14 +90,15 @@ def validate_step(params, dataset, hessian_label):
 def split_list_into_sublists(original_list, chunk_size):
     return [original_list[i:i + chunk_size] for i in range(0, len(original_list), chunk_size)]
 
-batch_size = 2
+batch_size = 1
 n_epoch = 100
 
 # Path to save the model
-ckpt_dir = epath.Path('/path_to_checkpoint/flax_ckpt/')
+ckpt_dir = epath.Path('/workspace/LRGB/results/INS_molecule/flax_ckpt/')
 
 train_dataloader = split_list_into_sublists(train_datasets, batch_size)
 val_dataloader = split_list_into_sublists(val_datasets, batch_size)
+test_dataloader = split_list_into_sublists(test_datasets, batch_size)
 
 x_epoch = np.zeros(0)
 train_loss_epoch = np.zeros(0)
@@ -142,3 +143,19 @@ for epoch in range(n_epoch):
     # Save the learning curve data
     learning_curve = np.stack((x_epoch, train_loss_epoch, val_loss_epoch))
     np.save('lc_hessian_1.npy', learning_curve) # lc = learning curve
+
+
+# test the model on the test set
+orbax_checkpointer = ocp.StandardCheckpointer()
+params = orbax_checkpointer.restore('/workspace/LRGB/results/INS_molecule/flax_ckpt/hessian_checkpoint_x')['model_param']
+
+for j, batch_temp in tqdm(enumerate(test_dataloader), total=len(test_dataloader)):
+    _batch, _hessian_true = graph_batch(batch_temp)
+    batch = pad_graph_to_nearest_power_of_two(_batch)
+    n_node_before = _batch.nodes['positions'].shape[0]
+    n_node_after = batch.nodes['positions'].shape[0]
+    hessian_true = jnp.pad(_hessian_true, ((0, n_node_after - n_node_before), (0, 0), (0, n_node_after - n_node_before), (0, 0)))
+    test_loss = validate_step(params, batch, hessian_true)
+    running_test_loss += test_loss
+running_test_loss = running_test_loss / len(test_dataloader)
+print(f"Test Loss: {running_test_loss}")
